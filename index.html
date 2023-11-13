@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IAE 2953 Schedule</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <main class="container">
+        <section aria-labelledby="schedule-heading">
+            <h2 id="schedule-heading">IAE 2953 Schedule</h2>
+            <p id="timezone-info"></p>
+            <label for="timezone-selector">Select Timezone Manually:</label>
+            <select id="timezone-selector" onchange="updateSchedule()"></select>
+            <article id="schedule"></article>
+        </section>
+
+        <footer>
+            <div class="button-container">
+                <button id="copyToDiscordBtn" onclick="copyToDiscord()">Click to copy schedule in Discord format</button>
+            </div>
+            <p class="disclaimer">This web app is not officially affiliated with Cloud Imperium Games or the Star
+                Citizen project.</p>
+        </footer>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
