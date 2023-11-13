@@ -203,5 +203,9 @@ label[for="timezone-selector"] {
     h2 {
         font-size: 3em;
     }
-    
+
+    #timezone-selector {
+        width: 30%;
+    }
+
 }
