@@ -116,6 +116,15 @@ h2 {
 .limited-sales {
     color: #ecc74c;
     font-weight: 700;
+    margin: 2em 0 0 0;
+}
+
+.finished-event .limited-sales {
+    display: none;
+}
+
+.finished-event .wave {
+    display: none;
 }
 
 .location {
