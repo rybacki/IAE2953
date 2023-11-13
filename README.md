@@ -33,3 +33,9 @@ This app is not officially affiliated with Cloud Imperium Games or the Star Citi
 ## License
 
 This project is open source, available under the [MIT License](LICENSE).
+
+
+<img width="1757" alt="Screenshot 2023-11-12 at 6 53 54 PM" src="https://github.com/rybacki/IAE2953/assets/10670194/b64d22e9-01a6-488c-87ee-f8e458359b5e">
+
+
+
