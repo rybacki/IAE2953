@@ -91,12 +91,12 @@ function getTimeLeft(timestamp, nextTimestamp) {
     const diffInSeconds = timestamp - now;
     const diffToNextInSeconds = nextTimestamp ? nextTimestamp - now : Number.MAX_SAFE_INTEGER; // Time until the next timestamp/event
 
-    // Event is happening now (for 24h duration)
-    if (diffInSeconds <= 0 && diffInSeconds > -86400) {
+    // Event is happening now (for 48h duration)
+    if (diffInSeconds <= 0 && diffInSeconds > -172800) {
         return { text: 'Happening Now', isHappening: true, hasPassed: false };
     }
     // Event has passed
-    if (diffInSeconds <= -86400) {
+    if (diffInSeconds <= -172800) {
         return { text: 'Finished', isHappening: false, hasPassed: true };
     }
     // Calculate the time left
@@ -153,7 +153,7 @@ function updateSchedule() {
         if (eventTimeLeft.isHappening) {
             eventHTML = `<div class="event event-active">`;
             // If the event is happening now, calculate the time left until it ends (24 hours from the start time)
-            const endTime = event.timestamp + 24 * 3600; // 24 hours after the event start time
+            const endTime = event.timestamp + 48 * 3600; // 24 hours after the event start time
             const timeLeftToEnd = getTimeLeft(endTime, null); // Calculate the time left until the event ends
 
             eventHTML += `<div class="event-name happening-now">${event.name} - Happening Now in ${event.location}<span class="time-left">${timeLeftToEnd.text} left</span></div>`;
@@ -179,7 +179,7 @@ function updateSchedule() {
                     event.waveTimestamps[waveIndex + 1] :
                     (nextEventTimestamp ? nextEventTimestamp : Number.MAX_SAFE_INTEGER);
                 const waveTimeLeft = getTimeLeft(waveTimestamp, nextWaveTimestamp);
-        
+
                 let waveStatus;
                 if (waveTimeLeft.isHappening) {
                     waveStatus = `Wave ${waveIndex + 1}: <span class="wave-happening-now">Started. Good Luck!</span>`;
@@ -195,11 +195,11 @@ function updateSchedule() {
                     waveStatus = `Wave ${waveIndex + 1}: ${waveTimeLeft.text}`;
                     lastWaveStatus = 'Upcoming';
                 }
-        
+
                 eventHTML += `<div class="wave">${waveStatus}</div>`;
             });
         }
-        
+
 
         eventHTML += `</div>`;
         scheduleContainer.innerHTML += eventHTML;
