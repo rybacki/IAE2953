@@ -46,13 +46,15 @@ const schedule = [
         name: "Misc/Mirai",
         timestamp: 1700841600,
         location: "Zenith Hall",
-        limitedSales: "Hull E",
+        limitedSales: "Misc Hull E",
         waveTimestamps: [1700841600, 1700870400, 1700899200]
     },
     {
         name: "RSI",
         timestamp: 1700928000,
-        location: "Apex Hall"
+        location: "Apex Hall",
+        limitedSales: "Constellation Phoenix",
+        waveTimestamps: [1700928000, 1700942400, 1700899200]
     },
     {
         name: "Best In Show",
