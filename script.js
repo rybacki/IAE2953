@@ -54,7 +54,7 @@ const schedule = [
         timestamp: 1700928000,
         location: "Apex Hall",
         limitedSales: "Constellation Phoenix",
-        waveTimestamps: [1700928000, 1700942400, 1700899200]
+        waveTimestamps: [1700928000, 1700942400, 1700985600]
     },
     {
         name: "Best In Show",
