@@ -65,7 +65,7 @@ const schedule = [
         name: "IAE 2953 Finale",
         timestamp: 1701100800,
         location: "Zenith Hall",
-        end: 1701360000
+        end: 1701417600
     }
 ];
 
