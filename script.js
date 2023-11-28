@@ -65,7 +65,7 @@ const schedule = [
         name: "IAE 2953 Finale",
         timestamp: 1701100800,
         location: "Zenith Hall",
-        end: 1701417600
+        end: 1701374400
     }
 ];
 
@@ -88,38 +88,43 @@ function convertTimestampToLocaleString(timestamp, timeZone) {
     return date.toLocaleString('en-US', { timeZone, hour12: true });
 }
 
-function getTimeLeft(timestamp, nextTimestamp) {
+function getTimeLeft(timestamp, nextTimestamp, endTimestamp) {
     const now = new Date().getTime() / 1000;
-    const diffInSeconds = timestamp - now;
-    const diffToNextInSeconds = nextTimestamp ? nextTimestamp - now : Number.MAX_SAFE_INTEGER; // Time until the next timestamp/event
+    let timeLeft, isHappening, hasPassed;
 
-    // Event is happening now (for 48h duration)
-    if (diffInSeconds <= 0 && diffInSeconds > -172800) {
-        return { text: 'Happening Now', isHappening: true, hasPassed: false };
+    if (endTimestamp) {
+        // For events with a specific end time
+        const timeUntilEnd = endTimestamp - now;
+        timeLeft = calculateTimeLeft(timeUntilEnd);
+        isHappening = now >= timestamp && now <= endTimestamp;
+        hasPassed = now > endTimestamp;
+    } else {
+        // For events with the default 48 hours duration
+        const timeUntilStart = timestamp - now;
+        const duration = 172800; // 48 hours in seconds
+        timeLeft = calculateTimeLeft(timeUntilStart);
+        isHappening = timeUntilStart <= 0 && timeUntilStart > -duration;
+        hasPassed = timeUntilStart <= -duration;
     }
-    // Event has passed
-    if (diffInSeconds <= -172800) {
-        return { text: 'Finished', isHappening: false, hasPassed: true };
-    }
-    // Calculate the time left
-    const days = Math.floor(diffInSeconds / (3600 * 24));
-    const hours = Math.floor((diffInSeconds % (3600 * 24)) / 3600);
-    const minutes = Math.floor((diffInSeconds % 3600) / 60);
-    const seconds = Math.floor(diffInSeconds % 60);
+
+    return { text: timeLeft, isHappening: isHappening, hasPassed: hasPassed };
+}
+
+function calculateTimeLeft(seconds) {
+    const days = Math.floor(seconds / (3600 * 24));
+    const hours = Math.floor((seconds % (3600 * 24)) / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secondsLeft = Math.floor(seconds % 60);
 
     let timeLeftText;
     if (days > 0) {
         timeLeftText = `${days}d:${hours.toString().padStart(2, '0')}h:${minutes.toString().padStart(2, '0')}m`;
     } else {
-        timeLeftText = `${hours.toString().padStart(2, '0')}h:${minutes.toString().padStart(2, '0')}m:${seconds.toString().padStart(2, '0')}s`;
+        timeLeftText = `${hours.toString().padStart(2, '0')}h:${minutes.toString().padStart(2, '0')}m:${secondsLeft.toString().padStart(2, '0')}s`;
     }
-
-    return {
-        text: timeLeftText,
-        isHappening: false,
-        hasPassed: diffToNextInSeconds <= 0
-    };
+    return timeLeftText;
 }
+
 
 
 function updateSchedule() {
@@ -148,28 +153,33 @@ function updateSchedule() {
 
     schedule.forEach((event, index) => {
         const nextEventTimestamp = (index < schedule.length - 1) ? schedule[index + 1].timestamp : null;
-        const eventTimeLeft = getTimeLeft(event.timestamp, nextEventTimestamp);
+        const eventTimeLeft = getTimeLeft(event.timestamp, nextEventTimestamp, event.end);
 
         let eventHTML = `<div class="event${eventTimeLeft.hasPassed ? ' finished-event' : ''}">`;
 
         if (eventTimeLeft.isHappening) {
             eventHTML = `<div class="event event-active">`;
-            // If the event is happening now, calculate the time left until it ends (24 hours from the start time)
-            const endTime = event.timestamp + 48 * 3600; // 24 hours after the event start time
-            const timeLeftToEnd = getTimeLeft(endTime, null); // Calculate the time left until the event ends
+            const endTime = event.end ? event.end : event.timestamp + 48 * 3600; // Use custom end time if available, else 48 hours after start
+            const timeLeftToEnd = endTime - (new Date().getTime() / 1000); // Time left in seconds
 
-            eventHTML += `<div class="event-name happening-now">${event.name} - Happening Now in ${event.location}<span class="time-left">${timeLeftToEnd.text} left</span></div>`;
+            let timeLeftText;
+            if (timeLeftToEnd > 0) {
+                timeLeftText = calculateTimeLeft(timeLeftToEnd); // Calculate the formatted time left
+            } else {
+                timeLeftText = 'Finished'; // If the time left is negative, the event has finished
+            }
+
+            eventHTML += `<div class="event-name happening-now">${event.name} - Happening Now in ${event.location}<span class="time-left">${timeLeftText}</span></div>`;
         } else if (eventTimeLeft.hasPassed) {
             eventHTML += `<div class="event-name finished">${event.name} - Finished</div>`;
         } else {
-            // Check if the event is starting within the next 24 hours
-            const diffInSeconds = event.timestamp - now;
-            if (diffInSeconds > 0 && diffInSeconds <= 86400) { // Less than 24 hours
+            const diffInSeconds = event.timestamp - (new Date().getTime() / 1000);
+            if (diffInSeconds > 0 && diffInSeconds <= 86400) {
                 eventHTML += `<div class="event-name">${event.name}</div>
-                              <div class="location">Event starting soon in: ${eventTimeLeft.text} at ${convertTimestampToLocaleString(event.timestamp, selectedTimeZone)} [${event.location}]</div>`;
+                          <div class="location">Event starting soon in: ${eventTimeLeft.text} at ${convertTimestampToLocaleString(event.timestamp, selectedTimeZone)} [${event.location}]</div>`;
             } else {
                 eventHTML += `<div class="event-name">${event.name}</div>
-                              <div class="location">${convertTimestampToLocaleString(event.timestamp, selectedTimeZone)} [${event.location}]</div>`;
+                          <div class="location">${convertTimestampToLocaleString(event.timestamp, selectedTimeZone)} [${event.location}]</div>`;
             }
         }
 
@@ -226,7 +236,7 @@ function copyToDiscord() {
         `**Misc/Mirai:**\n<t:1700841600:f> [Zenith Hall <t:1700841600:R>]\nLimited Ship Sales: Hull E\nWave 1: <t:1700841600:T>, Wave 2: <t:1700870400:T>, Wave 3: <t:1700899200:T>\n\n` +
         `**RSI:**\n<t:1700928000:f> [Apex Hall <t:1700928000:R>]\n\n` +
         `**Best In Show:**\n<t:1701014400:f> [Zenith Hall <t:1701014400:R>]\n\n` +
-        `**IAE 2953 Finale:**\n<t:1701100800:f> [Zenith Hall <t:1701100800:R>]\nEnd of IAE 2953: <t:1701360000:f> [Zenith Hall <t:1701360000:R>]`;
+        `**IAE 2953 Finale:**\n<t:1701100800:f> [Zenith Hall <t:1701100800:R>]\nEnd of IAE 2953: <t:1701374400:f> [Zenith Hall <t:1701374400:R>]`;
 
     navigator.clipboard.writeText(discordSchedule).then(() => {
         document.getElementById('copyToDiscordBtn').innerText = 'Copied schedule in Discord format';
